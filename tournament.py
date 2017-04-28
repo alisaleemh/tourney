@@ -134,19 +134,3 @@ def swissPairings():
         id2: the second player's unique id
         name2: the second player's name
     """
-
-
-deleteMatches()
-deletePlayers()
-registerPlayer("Ali")
-registerPlayer("Osgood")
-registerPlayer("Dylan")
-registerPlayer("Arsal")
-
-reportMatch('4', '3')
-reportMatch('2', '1')
-reportMatch('4', '3')
-reportMatch('1', '4')
-reportMatch('3', '2')
-reportMatch('1', '3')
-print countPlayers()
