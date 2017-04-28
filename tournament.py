@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# 
+#
 # tournament.py -- implementation of a Swiss-system tournament
 #
 
@@ -11,27 +10,69 @@ def connect():
     return psycopg2.connect("dbname=tournament")
 
 
+def readFile(file):
+    file_obj = open(file, 'r')
+    return file_obj.read()
+
+
 def deleteMatches():
     """Remove all the match records from the database."""
+    dbh = connect()
+    cur = dbh.cursor()
+    query = readFile('sql/delete_matches.sql')
+    print query
+    cur.execute(query)
+    dbh.commit()
+    dbh.close()
 
 
 def deletePlayers():
-    """Remove all the player records from the database."""
+    dbh = connect()
+    cur = dbh.cursor()
+    query = readFile('sql/delete_players.sql')
+    print query
+    cur.execute(query)
+    dbh.commit()
+    dbh.close()
 
 
 def countPlayers():
+
     """Returns the number of players currently registered."""
+
+    dbh = connect()
+    cur = dbh.cursor()
+    query = readFile('sql/count_players.sql')
+    cur.execute(query)
+    count = cur.fetchone()
+    return count[0]
 
 
 def registerPlayer(name):
     """Adds a player to the tournament database.
-  
+
     The database assigns a unique serial id number for the player.  (This
     should be handled by your SQL database schema, not in your Python code.)
-  
+
     Args:
       name: the player's full name (need not be unique).
     """
+
+    dbh = connect()
+    cur = dbh.cursor()
+
+    try:
+        cur.execute("INSERT INTO PLAYERS (name) VALUES ('%s')" % (name,))
+    except psycopg2.Error as error:
+        print "Failed to insert | registerPlayer() at line 65"
+        print error.pgerror
+
+    try:
+        dbh.commit()
+    except:
+        print "Failed to commit | registerPlayer()"
+        dbh.rollback()
+    dbh.close()
 
 
 def playerStandings():
@@ -56,16 +97,36 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
- 
- 
+    dbh = connect()
+    cur = dbh.cursor()
+
+    if int(winner) == int(loser):
+        return
+
+    try:
+        query = "INSERT INTO MATCH (winner, loser) VALUES (%s, %s)"
+        params = (int(winner), int(loser))
+        cur.execute(query, params)
+    except psycopg2.Error as error:
+        print "Failed to insert | registeMatch()"
+        print error.pgerror
+
+    try:
+        dbh.commit()
+    except:
+        print "Failed to commit | reportMatch()"
+        dbh.rollback()
+    dbh.close()
+
+
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.
-  
+
     Assuming that there are an even number of players registered, each player
     appears exactly once in the pairings.  Each player is paired with another
     player with an equal or nearly-equal win record, that is, a player adjacent
     to him or her in the standings.
-  
+
     Returns:
       A list of tuples, each of which contains (id1, name1, id2, name2)
         id1: the first player's unique id
@@ -75,3 +136,17 @@ def swissPairings():
     """
 
 
+deleteMatches()
+deletePlayers()
+registerPlayer("Ali")
+registerPlayer("Osgood")
+registerPlayer("Dylan")
+registerPlayer("Arsal")
+
+reportMatch('4', '3')
+reportMatch('2', '1')
+reportMatch('4', '3')
+reportMatch('1', '4')
+reportMatch('3', '2')
+reportMatch('1', '3')
+print countPlayers()
