@@ -62,7 +62,8 @@ def registerPlayer(name):
     cur = dbh.cursor()
 
     try:
-        cur.execute("INSERT INTO PLAYERS (name) VALUES ('%s')" % (name,))
+        query = "INSERT INTO PLAYERS (name) VALUES (%s)"
+        cur.execute(query, (name,))
     except psycopg2.Error as error:
         print "Failed to insert | registerPlayer() at line 65"
         print error.pgerror
@@ -88,6 +89,15 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
+    dbh = connect()
+    cur = dbh.cursor()
+
+    query = "SELECT * FROM standings"
+    cur.execute(query)
+    return cur.fetchall()
+
+
+    dbh.close()
 
 
 def reportMatch(winner, loser):
@@ -134,3 +144,13 @@ def swissPairings():
         id2: the second player's unique id
         name2: the second player's name
     """
+    swissPairings = []
+    standingsList = playerStandings()
+    i = 0
+    while i < len(standingsList):
+        swissPairings.append((standingsList[i][0],
+                              standingsList[i][1],
+                              standingsList[i + 1][0],
+                              standingsList[i + 1][1]))
+        i += 2
+    return swissPairings
