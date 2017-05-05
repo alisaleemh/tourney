@@ -18,16 +18,17 @@ CREATE OR REPLACE VIEW standings as
     COALESCE(a.id, b.id) AS id,
     COALESCE(a.name, b.name) AS name,
     COALESCE(a.wins, 0) AS wins,
-    COALESCE(b.losses, 0) AS losses
+    (a.wins + b.losses) AS matches
+    --COALESCE(b.losses, 0) AS losses
   FROM
     (SELECT
       p.id AS id,
       p.name AS name,
       COUNT(m.winner) AS wins
     FROM
-      players p,
+      players p FULL OUTER JOIN
       match m
-    WHERE
+    ON 
       p.id = m.winner
     GROUP BY p.id) a FULL OUTER JOIN
     (SELECT
@@ -35,9 +36,9 @@ CREATE OR REPLACE VIEW standings as
       p.name AS name,
       COUNT(m.loser) AS losses
     FROM
-      players p,
+      players p FULL OUTER JOIN
       match m
-    WHERE
+    ON
       p.id = m.loser
     GROUP BY p.id) b
     ON
