@@ -62,7 +62,8 @@ def registerPlayer(name):
     cur = dbh.cursor()
 
     try:
-        cur.execute("INSERT INTO PLAYERS (name) VALUES ('%s')" % (name,))
+        query = "INSERT INTO PLAYERS (name) VALUES (%s)"
+        cur.execute(query, (name,))
     except psycopg2.Error as error:
         print "Failed to insert | registerPlayer() at line 65"
         print error.pgerror
