@@ -94,10 +94,10 @@ def playerStandings():
 
     query = "SELECT * FROM standings"
     cur.execute(query)
-    return cur.fetchall()
-
+    standings = cur.fetchall()
 
     dbh.close()
+    return standings
 
 
 def reportMatch(winner, loser):
@@ -147,6 +147,8 @@ def swissPairings():
     swissPairings = []
     standingsList = playerStandings()
     i = 0
+    if len(standingsList) % 2 != 0:
+        return "error, number not even"
     while i < len(standingsList):
         swissPairings.append((standingsList[i][0],
                               standingsList[i][1],

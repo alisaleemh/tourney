@@ -9,8 +9,9 @@ CREATE TABLE players (
 DROP TABLE IF EXISTS match CASCADE;
 CREATE TABLE match (
   id serial primary key,
-  winner INT references players(id),
-  loser INT references players(id)
+  winner INT references players(id) ON DELETE CASCADE CHECK (winner <> loser),
+  loser INT references players(id) ON DELETE CASCADE CHECK (winner <> loser)
+
 );
 
 CREATE OR REPLACE VIEW standings as
@@ -28,7 +29,7 @@ CREATE OR REPLACE VIEW standings as
     FROM
       players p FULL OUTER JOIN
       match m
-    ON 
+    ON
       p.id = m.winner
     GROUP BY p.id) a FULL OUTER JOIN
     (SELECT
